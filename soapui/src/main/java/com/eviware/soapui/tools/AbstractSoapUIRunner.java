@@ -53,7 +53,7 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
     public static final int ABNORMAL_TERMINATION = -1;
 
     private boolean groovyLogInitialized;
-    private String projectFile;
+    private String[] projectFiles;
     protected final Logger log = Logger.getLogger(getClass());
     private String settingsFile;
     private String soapUISettingsPassword;
@@ -164,7 +164,14 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
                 return false;
             }
 
-            setProjectFile(args[0]);
+            String[] projectFiles;
+            if (args[0].contains(";")) {
+                //multiple projects to be loaded
+                projectFiles = args[0].split(";");
+            } else {
+                projectFiles = new String[]{args[0]};
+            }
+            setProjectFiles(projectFiles);
         }
 
         return processCommandLine(cmd);
@@ -172,6 +179,7 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
 
     /**
      * Checks if the command line arguments require a project file
+     *
      * @param cmd The command line
      * @return true as default
      */
@@ -234,7 +242,11 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
      */
     @Override
     public String getProjectFile() {
-        return projectFile;
+        return getProjectFiles().length > 0 ? getProjectFiles()[0] : null;
+    }
+
+    public String[] getProjectFiles() {
+        return projectFiles;
     }
 
     /*
@@ -311,11 +323,15 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
     /**
      * Sets the SoapUI project file containing the tests to run
      *
-     * @param projectFile the SoapUI project file containing the tests to run
+     * @param //projectFile the SoapUI project file containing the tests to run
      */
 
     public void setProjectFile(String projectFile) {
-        this.projectFile = projectFile;
+        this.projectFiles = new String[]{projectFile};
+    }
+
+    public void setProjectFiles(String[] projectFiles) {
+        this.projectFiles = projectFiles;
     }
 
     /**
@@ -361,18 +377,15 @@ public abstract class AbstractSoapUIRunner implements CmdLineRunner {
         }
     }
 
-    public void setCustomHeaders( String[] optionValues )
-    {
-        for( String option : optionValues )
-        {
-            int ix = option.indexOf( '=' );
-            if( ix != -1 )
-            {
+    public void setCustomHeaders(String[] optionValues) {
+        for (String option : optionValues) {
+            int ix = option.indexOf('=');
+            if (ix != -1) {
                 // not optimal - it would be nicer if the filter could access command-line options via some
                 // generic mechanism.
                 String name = option.substring(0, ix);
                 String value = option.substring(ix + 1);
-                log.info( "Adding global HTTP Header [" + name + "] = [" + value + "]");
+                log.info("Adding global HTTP Header [" + name + "] = [" + value + "]");
 
                 GlobalHttpHeadersRequestFilter.addGlobalHeader(name, value);
             }

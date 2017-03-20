@@ -208,6 +208,7 @@ public class WsdlProject extends AbstractTestPropertyHolderWsdlModelItem<Project
         try {
             if (path != null && open) {
                 File file = new File(path.trim());
+                SoapUI.log.info("Open file: " + file.getAbsolutePath());
                 if (file.exists()) {
                     try {
                         loadProject(file.toURI().toURL());

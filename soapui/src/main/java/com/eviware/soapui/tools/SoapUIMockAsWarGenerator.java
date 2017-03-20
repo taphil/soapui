@@ -108,10 +108,9 @@ public class SoapUIMockAsWarGenerator extends AbstractSoapUIRunner {
 
     @Override
     protected boolean runRunner() throws Exception {
-        WsdlProject project = (WsdlProject) ProjectFactoryRegistry.getProjectFactory("wsdl").createNew(
-                getProjectFile(), getProjectPassword());
-
         String pFile = getProjectFile();
+        WsdlProject project = (WsdlProject) ProjectFactoryRegistry.getProjectFactory("wsdl").createNew(
+                pFile, getProjectPassword());
 
         project.getSettings().setString(ProjectSettings.SHADOW_PASSWORD, null);
 

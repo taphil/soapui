@@ -89,44 +89,50 @@ public class SoapUIMockServiceRunner extends AbstractSoapUIRunner {
     public boolean runRunner() throws Exception {
         initGroovyLog();
 
-        String projectFile = getProjectFile();
-
-        // WsdlProject project = new WsdlProject( projectFile,
-        // getProjectPassword() );
-        project = (WsdlProject) ProjectFactoryRegistry.getProjectFactory("wsdl").createNew(projectFile,
-                getProjectPassword());
-        if (project.isDisabled()) {
-            throw new Exception("Failed to load SoapUI project file [" + projectFile + "]");
-        }
-
-        initProject();
-
-        if (mockService == null) {
-            log.info("Running all MockServices in project [" + project.getName() + "]");
-        } else {
-            log.info("Running MockService [" + mockService + "] in project [" + project.getName() + "]");
-        }
-
-        log.info("Press any key to terminate");
+        // String projectFile = getProjectFile();
+        String[] projectFiles = getProjectFiles();
 
         long startTime = System.nanoTime();
-
-        for (int c = 0; c < project.getMockServiceCount(); c++) {
-            MockService mockService = project.getMockServiceAt(c);
-            if (this.mockService == null || mockService.getName().equals(this.mockService)) {
-                runMockService(mockService);
+        for (String projectFile : projectFiles) {
+//		String projectFile = projectFiles[0];
+            // WsdlProject project = new WsdlProject( projectFile,
+            // getProjectPassword() );
+            log.info("Searching for project: " + projectFile);
+            project = (WsdlProject) ProjectFactoryRegistry.getProjectFactory("wsdl").createNew(projectFile,
+                    getProjectPassword());
+            if (project.isDisabled()) {
+                throw new Exception("Failed to load SoapUI project file [" + projectFile + "]");
             }
-        }
 
-        for (int c = 0; c < project.getRestMockServiceCount(); c++) {
-            MockService mockService = project.getRestMockServiceAt(c);
-            if (this.mockService == null || mockService.getName().equals(this.mockService)) {
-                runMockService(mockService);
+            initProject();
+
+            if (mockService == null) {
+                log.info("Running all MockServices in project [" + project.getName() + "]");
+            } else {
+                log.info("Running MockService [" + mockService + "] in project [" + project.getName() + "]");
             }
+
+            log.info("Press any key to terminate");
+
+
+            for (int c = 0; c < project.getMockServiceCount(); c++) {
+                MockService mockService = project.getMockServiceAt(c);
+                if (this.mockService == null || mockService.getName().equals(this.mockService)) {
+                    runMockService(mockService);
+                }
+            }
+
+            for (int c = 0; c < project.getRestMockServiceCount(); c++) {
+                MockService mockService = project.getRestMockServiceAt(c);
+                if (this.mockService == null || mockService.getName().equals(this.mockService)) {
+                    runMockService(mockService);
+                }
+            }
+
+            log.info("Started " + runners.size() + " runner" + ((runners.size() == 1) ? "" : "s"));
+
+
         }
-
-        log.info("Started " + runners.size() + " runner" + ((runners.size() == 1) ? "" : "s"));
-
         if (block) {
             System.out.println("Press any key to terminate...");
             while (System.in.available() == 0) {
@@ -166,7 +172,6 @@ public class SoapUIMockServiceRunner extends AbstractSoapUIRunner {
         log.info("time taken: " + timeTaken + "ms");
 
         exportReports();
-
         return block;
     }
 
